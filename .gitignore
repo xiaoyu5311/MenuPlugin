@@ -1,0 +1,12 @@
+vsxmake2022/
+
+# XMake
+/.xmake/
+/build/
+/CMakeLists.txt
+
+
+# Project specific ignores
+/.idea/
+/.vscode/
+/bin/
