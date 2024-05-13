@@ -1,5 +1,6 @@
 ﻿#include "MenuEventRegister.h"
 
+#include <mc/server/commands/CommandRegistry.h>
 #include <mc/world/item/registry/ItemStack.h>
 #include "ll/api/event/EventBus.h"
 #include "ll/api/event/player/PlayerJoinEvent.h"
@@ -12,10 +13,11 @@ using ll::event::ListenerPtr;
 using ll::event::player::PlayerJoinEvent;
 using ll::event::player::PlayerUseItemEvent;
 
-void MenuEventRegister::EventRegister() {
-
+void MenuEventRegister::EventRegister()
+{
     playerJoinEventListener = eventBus->emplaceListener<PlayerJoinEvent>(
-        [](PlayerJoinEvent& event) {
+        [](PlayerJoinEvent& event)
+        {
             auto& player = event.self();
 
             const auto& uuid = player.getUuid();
@@ -28,20 +30,23 @@ void MenuEventRegister::EventRegister() {
     );
 
     playerUseItemEventListener =
-        eventBus->emplaceListener<PlayerUseItemEvent>([](PlayerUseItemEvent& event) {
+        eventBus->emplaceListener<PlayerUseItemEvent>([](PlayerUseItemEvent& event)
+        {
             auto& player = event.self();
             auto& itemStack = event.item();
-            if (itemStack.getRawNameId() == "clock") {
+            if (itemStack.getRawNameId() == "clock")
+            {
                 CommandContext context = CommandContext(
                     "menu",
                     std::make_unique<PlayerCommandOrigin>(PlayerCommandOrigin(player))
                 );
-                // ll::service::getMinecraft()->getCommands().executeCommand(context);
+                optional_ref<Minecraft> minecraft = ll::service::getMinecraft();
             }
         });
 }
 
-void MenuEventRegister::RemoveEventListener() {
+void MenuEventRegister::RemoveEventListener()
+{
     eventBus->removeListener(playerJoinEventListener);
     eventBus->removeListener(playerUseItemEventListener);
 }

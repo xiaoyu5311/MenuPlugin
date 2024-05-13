@@ -1,6 +1,7 @@
 ﻿#pragma once
 
-class ICommandRegister {
+class ICommandRegister
+{
 public:
     virtual ~ICommandRegister() = default;
     virtual void CommandRegister() =0;

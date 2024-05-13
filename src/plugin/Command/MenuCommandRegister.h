@@ -13,10 +13,10 @@ using ll::plugin::NativePlugin;
 using ll::reflection::Reflectable;
 using ll::command::EmptyParam;
 
-class MenuCommandRegister : public CommandRegisterBase {
-
+class MenuCommandRegister : public CommandRegisterBase
+{
 public:
-    MenuCommandRegister() {}
+    MenuCommandRegister();
 
     void RegisterRootCommand(const string& rootCommandName,
                              const string& description,
@@ -24,5 +24,4 @@ public:
                              CommandFlag flag = CommandFlagValue::NotCheat,
                              weak_ptr<Plugin> plugin = NativePlugin::current());
     void CommandRegister() override;
-
 };
