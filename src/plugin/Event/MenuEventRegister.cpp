@@ -9,6 +9,10 @@
 #include "mc/server/commands/PlayerCommandOrigin.h"
 #include "ll/api/service/Bedrock.h"
 
+#include <mc/world/Minecraft.h>
+#include <mc/server/commands/MinecraftCommands.h>
+
+
 using ll::event::ListenerPtr;
 using ll::event::player::PlayerJoinEvent;
 using ll::event::player::PlayerUseItemEvent;
@@ -41,6 +45,7 @@ void MenuEventRegister::EventRegister()
                     std::make_unique<PlayerCommandOrigin>(PlayerCommandOrigin(player))
                 );
                 optional_ref<Minecraft> minecraft = ll::service::getMinecraft();
+                minecraft->getCommands().executeCommand(context);
             }
         });
 }
