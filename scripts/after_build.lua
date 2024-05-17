@@ -89,7 +89,7 @@ function pack_plugin(target,plugin_define)
     if manifest_path then
         local manifest = io.readfile(manifest_path)
         -- local bindir = path.join(os.projectdir(), "bin")
-        local bindir = path.join("F:/Games/mc/MCForWindows/bedrock-server-1.20.81.01", "plugins")
+        local bindir = path.join("F:/Games/Minecraft/MCBE/Server/BDS-1.20.81", "plugins")
        local outputdir = path.join(bindir, plugin_define.pluginName)
         local targetfile = path.join(outputdir, plugin_define.pluginFile)
         local pdbfile = path.join(outputdir, path.basename(plugin_define.pluginFile) .. ".pdb")

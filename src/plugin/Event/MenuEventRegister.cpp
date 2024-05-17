@@ -11,6 +11,7 @@
 
 #include <mc/world/Minecraft.h>
 #include <mc/server/commands/MinecraftCommands.h>
+#include <plugin/HTTP/HttpService.h>
 
 
 using ll::event::ListenerPtr;
@@ -23,13 +24,14 @@ void MenuEventRegister::EventRegister()
         [](PlayerJoinEvent& event)
         {
             auto& player = event.self();
-
             const auto& uuid = player.getUuid();
 
+            //如果玩家是第一次进入游戏  数据库没有查询到
             ItemStack itemStack("clock", 1);
             player.add(itemStack);
-
             player.refreshInventory();
+
+            
         }
     );
 
