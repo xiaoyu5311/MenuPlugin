@@ -12,6 +12,9 @@
 #include <mc/world/Minecraft.h>
 #include <mc/server/commands/MinecraftCommands.h>
 #include <plugin/HTTP/HttpService.h>
+#include <plugin/Log/Log.h>
+
+#include "plugin/Utils/JsonHelper.h"
 
 
 using ll::event::ListenerPtr;
@@ -25,13 +28,32 @@ void MenuEventRegister::EventRegister()
         {
             auto& player = event.self();
             const auto& uuid = player.getUuid();
+            const string& name = player.getName();
+
+            json loginInfo;
+            loginInfo["uuid"] = uuid;
+            loginInfo["nickname"] = name;
+
+            string json = loginInfo.dump();
+            string url = "/user/login";
+            string res = HttpService_::post_request(url, json);
+
+            bool bNewPlayer = JsonHelper::get_data(res).get<bool>();
 
             //如果玩家是第一次进入游戏  数据库没有查询到
-            ItemStack itemStack("clock", 1);
-            player.add(itemStack);
-            player.refreshInventory();
-
-            
+            if (bNewPlayer)
+            {
+                Log::Info("新玩家" + name + "进入游戏");
+                ItemStack itemStack("clock", 1);
+                player.add(itemStack);
+                player.refreshInventory();
+                player.sendMessage("欢迎新玩家：" + name);
+            }
+            else
+            {
+                Log::Info("老玩家" + name + "进入游戏");
+                player.sendMessage("欢迎回来：" + name);
+            }
         }
     );
 

@@ -2,20 +2,23 @@
 
 
 UserWidgetBase::UserWidgetBase()
-    : simple_form(nullptr), custom_form_(nullptr)
+    : m_simple_form(nullptr), m_custom_form(nullptr)
 {
 }
 
 UserWidgetBase::~UserWidgetBase()
 {
-    if (simple_form)
+    if (m_simple_form)
     {
-        delete simple_form;
-        simple_form = nullptr;
+        delete m_simple_form;
+        m_simple_form = nullptr;
     }
-    if (custom_form_)
+    if (m_custom_form)
     {
-        delete custom_form_;
-        custom_form_ = nullptr;
+        delete m_custom_form;
+        m_custom_form = nullptr;
     }
-};
+}
+
+
+

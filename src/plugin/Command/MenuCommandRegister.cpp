@@ -41,15 +41,16 @@ void MenuCommandRegister::CommandRegister()
             {
                 if (Player* player = static_cast<Player*>(origin.getEntity()))
                 {
-                    main_user_widget = new MainUserWidget();
+                    if (nullptr == main_user_widget)
+                    {
+                        main_user_widget = new MainUserWidget(); //因为复用
+                    }
                     main_user_widget->CreateUserWidget(*player);
-
                     Log::Info("打开主菜单");
                 }
                 else
                 {
                     Log::Info("玩家为null");
-
                 }
             });
     }

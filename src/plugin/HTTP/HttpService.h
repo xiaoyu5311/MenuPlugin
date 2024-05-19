@@ -1,19 +1,16 @@
 ﻿#pragma once
-#include <plugin/Log/Log.h>
+#include <string>
+// #include <plugin/Log/Log.h>
 
+using std::string;
 
-using namespace std;
 
 class HttpService_
 {
 private:
-    string ip = "127.0.0.1";
-    int port = 8084;
-
+    // string ip = "127.0.0.1";
+    // int port = 8084;
 public:
-    ~ HttpService_()
-    {
-    }
-
-    
+    static string post_request(string& path, string& body);
+    static string get_request(string& path);
 };
