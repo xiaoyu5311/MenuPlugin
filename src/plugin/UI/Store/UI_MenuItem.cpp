@@ -1,5 +1,6 @@
 ﻿#include "UI_MenuItem.h"
 
+#include <regex>
 #include <mc/server/commands/CommandContext.h>
 #include <mc/server/commands/PlayerCommandOrigin.h>
 #include <mc/world/Minecraft.h>
@@ -7,6 +8,7 @@
 #include <mc/server/commands/MinecraftCommands.h>
 
 #include "plugin/Constant/NavTitle.h"
+
 
 void UI_MenuItem::CreateUserWidget(Player& player)
 {
@@ -23,9 +25,21 @@ void UI_MenuItem::CreateUserWidget(Player& player)
             Log::Info("是goods");
             create_goods_form(player);
         }
+
+        else if ("recycle" == m_menu_item.formType)
+        {
+            Log::Info("是recycle");
+            create_recycle_goods_form(player);
+        }
         return;
     }
-    string path = "/menu/sublist/" + std::to_string(m_menu_item.menuId);
+
+
+    std::string path = URL::SUB_MENU;
+    std::string menuIdStr = std::to_string(m_menu_item.menuId);
+    path = std::regex_replace(path, std::regex("\\{id\\}"), menuIdStr);
+
+
     std::string res = HttpService_::get_request(path); //获取子菜单列表
     json list = JsonHelper::get_data(res);
     //还未到底
@@ -44,8 +58,11 @@ void UI_MenuItem::CreateUserWidget(Player& player)
 
 void UI_MenuItem::create_goods_form(Player& player)
 {
-    string base = "/store/sell/";
-    string path = base.append(std::to_string(m_menu_item.menuId)); //parent_id就是商品
+    std::string path = URL::GET_SELL_GOODSINFO;
+    std::string menuIdStr = std::to_string(m_menu_item.menuId);
+    path = std::regex_replace(path, std::regex("\\{id\\}"), menuIdStr);
+
+
     string res = HttpService_::get_request(path);
     json json_data = JsonHelper::get_data(res);
     const SellGoodsDetail sell_goods_detail(json_data);
@@ -90,6 +107,62 @@ void UI_MenuItem::create_goods_form(Player& player)
     });
 }
 
+void UI_MenuItem::create_recycle_goods_form(Player& player)
+{
+    string path = URL::GET_RECYCLEDGOODSINFO;
+    std::string menuIdStr = std::to_string(m_menu_item.menuId);
+    // 使用 std::regex_replace 来替换 {id}
+    path = std::regex_replace(path, std::regex("\\{id\\}"), menuIdStr);
+
+
+    string res = HttpService_::get_request(path);
+    json json_data = JsonHelper::get_data(res);
+    const RecycledGoodsDetail recycle_goods_detail(json_data);
+
+
+    CustomForm m_custom_form(NavTitle::BUY_CATE_BLOCK);
+    m_custom_form.appendLabel("回收" + recycle_goods_detail.goodsName + "...");
+    m_custom_form.appendLabel(
+        "价格：50 / " + std::to_string(static_cast<int>(recycle_goods_detail.recycledPrice * 100) / 100.0) + "￥" +
+        "       原价：" +
+        std::to_string(static_cast<int>(recycle_goods_detail.originalPrice * 100) / 100.0)
+        + "￥");
+    m_custom_form.appendSlider("slieder1", "请输入要回收的数量", 1, 64, 1, 0);
+
+    m_custom_form.sendTo(player, [=](Player& player, ll::form::CustomFormResult const& result,
+                                     ll::form::FormCancelReason cancel_reason)
+    {
+        RecycledGoodsDetail recycle_goods_detail_inner = recycle_goods_detail;
+        string uuid = player.getUuid().asString();
+        int amount = static_cast<int>(get<double>(result->at("slieder1"))); //要出售的数量
+
+        bool objects_amount = query_objects_amount(player, recycle_goods_detail_inner.objectId, amount);
+
+        //足够
+        if (objects_amount)
+        {
+            RecycleGoods recycle_goods(uuid, recycle_goods_detail_inner.goodsId, amount);
+            string jsonStr = recycle_goods.toJson();
+            std::string path = URL::RECYCLE_GOODS;
+
+            string res = HttpService_::post_request(path, jsonStr);
+            bool bSuccess = JsonHelper::get_data(res).get<bool>();
+            //购买成功
+            if (bSuccess)
+            {
+                //执行指令
+                execute_reduce_command(player, recycle_goods_detail_inner.objectId, amount);
+                player.sendMessage("回收成功");
+            }
+        }
+        //购买失败
+        else
+        {
+            player.sendMessage("回收失败，数量不足");
+        }
+    });
+}
+
 bool UI_MenuItem::execute_givecommand(Player& player, string object_id, int amount)
 {
     string command = "give " + player.getName() + " " + object_id + " " + std::to_string(amount);
@@ -97,5 +170,15 @@ bool UI_MenuItem::execute_givecommand(Player& player, string object_id, int amou
     );
     optional_ref<Minecraft> minecraft = ll::service::getMinecraft();
     minecraft->getCommands().executeCommand(context);
+    return true;
+}
+
+bool UI_MenuItem::execute_reduce_command(const Player& player, const string& string, int amount)
+{
+    return true;
+}
+
+bool UI_MenuItem::query_objects_amount(const Player& player, const string& string, int amount)
+{
     return true;
 }

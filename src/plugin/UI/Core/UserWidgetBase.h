@@ -96,6 +96,49 @@ struct SellGoods
     }
 };
 
+struct RecycledGoodsDetail
+{
+    int goodsId;
+    int amount; //回收的数
+    double recycledPrice;
+    double originalPrice;
+    string goodsName;
+    string objectId;
+
+    RecycledGoodsDetail(const json& json)
+    {
+        json.at("goodsId").get_to(goodsId);
+        json.at("amount").get_to(amount);
+        json.at("recycledPrice").get_to(recycledPrice);
+        json.at("originalPrice").get_to(originalPrice);
+        json.at("goodsName").get_to(goodsName);
+        json.at("objectId").get_to(objectId);
+    }
+};
+
+struct RecycleGoods
+{
+    string uuid;
+    int goodsId;
+    int amount; //回收的数
+    RecycleGoods(const string& uuid, int goods_id, int amount)
+        : uuid(uuid),
+          goodsId(goods_id),
+          amount(amount)
+    {
+    }
+
+    string toJson()
+    {
+        json recycle_goods;
+        recycle_goods["uuid"] = uuid;
+        recycle_goods["goodsId"] = goodsId;
+        recycle_goods["amount"] = amount;
+        string recycle = recycle_goods.dump();
+        return recycle;
+    }
+};
+
 class UserWidgetBase : public UserWiget
 {
 protected:

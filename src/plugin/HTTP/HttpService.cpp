@@ -1,7 +1,6 @@
 ﻿#include "HttpService.h"
 
 #include <plugin/Log/Log.h>
-
 #include "httplib.h"
 
 string HttpService_::post_request(string& path, string& body)
@@ -20,6 +19,8 @@ string HttpService_::post_request(string& path, string& body)
     }
     return "";
 }
+
+
 
 string HttpService_::get_request(string& path)
 {

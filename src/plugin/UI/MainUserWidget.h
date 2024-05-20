@@ -2,13 +2,14 @@
 #include <mc/world/actor/player/Player.h>
 
 #include "Core/UserWiget.h"
+#include "plugin/Constant/NavTitle.h"
 #include "Teleport/TeleportUserWidget.h"
 
 
 class MainUserWidget : public UserWidgetBase
 {
 public:
-    MainUserWidget(const string& path = "/menu/catelist")
+    MainUserWidget(const string& path = URL::MAIN_MENU)
         : path(path)
     {
     }

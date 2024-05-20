@@ -14,6 +14,7 @@
 #include <plugin/HTTP/HttpService.h>
 #include <plugin/Log/Log.h>
 
+#include "plugin/Constant/NavTitle.h"
 #include "plugin/Utils/JsonHelper.h"
 
 
@@ -35,7 +36,7 @@ void MenuEventRegister::EventRegister()
             loginInfo["nickname"] = name;
 
             string json = loginInfo.dump();
-            string url = "/user/login";
+            string url = URL::LOGIN;
             string res = HttpService_::post_request(url, json);
 
             bool bNewPlayer = JsonHelper::get_data(res).get<bool>();
