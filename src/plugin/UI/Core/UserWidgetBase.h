@@ -139,6 +139,31 @@ struct RecycleGoods
     }
 };
 
+
+struct BoughtGoodsVO
+{
+    double balance; //剩余的余额
+    bool commit; //是否成功
+
+    BoughtGoodsVO(const json& jsonData)
+    {
+        jsonData.at("balance").get_to(balance);
+        jsonData.at("commit").get_to(commit);
+    }
+};
+
+struct RecycleGoodsEchoVO
+{
+    double balance; //剩余的余额
+    double balanceIncr; //是否成功
+
+    RecycleGoodsEchoVO(const json& jsonData)
+    {
+        jsonData.at("balance").get_to(balance);
+        jsonData.at("balanceIncr").get_to(balanceIncr);
+    }
+};
+
 class UserWidgetBase : public UserWiget
 {
 protected:

@@ -14,7 +14,6 @@ void UI_MenuItem::CreateUserWidget(Player& player)
 {
     Log::Info("判断是否到底：" + m_menu_item.toString());
 
-
     if (0 == m_menu_item.depth) //因为本身没有子菜单了
     {
         Log::Info("depth=0");
@@ -66,12 +65,14 @@ void UI_MenuItem::create_goods_form(Player& player)
     string res = HttpService_::get_request(path);
     json json_data = JsonHelper::get_data(res);
     const SellGoodsDetail sell_goods_detail(json_data);
-    CustomForm m_custom_form(NavTitle::BUY_CATE_BLOCK);
+
+
+    CustomForm m_custom_form(NavTitle::BUY + sell_goods_detail.goodsName);
     m_custom_form.appendLabel("你正在购买" + sell_goods_detail.goodsName + "...");
 
 
     m_custom_form.appendLabel(
-        "价格：50 / " + std::to_string(static_cast<int>(sell_goods_detail.goodsPrice * 100) / 100.0) + "￥" + " 原价：" +
+        "价格：1 / " + std::to_string(static_cast<int>(sell_goods_detail.goodsPrice * 100) / 100.0) + "￥" + " 原价：" +
         std::to_string(static_cast<int>(sell_goods_detail.originalPrice * 100) / 100.0)
         + "￥");
     m_custom_form.appendSlider("slieder1", "请输入要购买的数量", 1, 64, 1, 0);
@@ -88,21 +89,23 @@ void UI_MenuItem::create_goods_form(Player& player)
         SellGoods sell_goods(uuid, sell_goods_detail_inner.goodsId, amount);
 
         string jsonStr = sell_goods.toJson();
-        string sellUrl = "/store/sell";
+        string sellUrl = URL::SELL_GOODS;
         string res = HttpService_::post_request(sellUrl, jsonStr);
-        bool bSuccess = JsonHelper::get_data(res).get<bool>();
+        json jsonData = JsonHelper::get_data(res);
 
+        BoughtGoodsVO bought_goods_vo(jsonData);
         //购买成功
-        if (bSuccess)
+        if (bought_goods_vo.commit)
         {
             //执行指令
             execute_givecommand(player, sell_goods_detail_inner.objectId, amount);
-            player.sendMessage("购买成功");
+            player.sendMessage("购买成功~\n "
+                "剩余余额:" + std::to_string(bought_goods_vo.balance) + "￥");
         }
         //购买失败
         else
         {
-            player.sendMessage("购买失败,余额不足");
+            player.sendMessage("购买失败,余额不足\n余额:" + std::to_string(bought_goods_vo.balance) + "￥");
         }
     });
 }
@@ -119,11 +122,10 @@ void UI_MenuItem::create_recycle_goods_form(Player& player)
     json json_data = JsonHelper::get_data(res);
     const RecycledGoodsDetail recycle_goods_detail(json_data);
 
-
-    CustomForm m_custom_form(NavTitle::BUY_CATE_BLOCK);
+    CustomForm m_custom_form(NavTitle::RECYCLE + recycle_goods_detail.goodsName);
     m_custom_form.appendLabel("回收" + recycle_goods_detail.goodsName + "...");
     m_custom_form.appendLabel(
-        "价格：50 / " + std::to_string(static_cast<int>(recycle_goods_detail.recycledPrice * 100) / 100.0) + "￥" +
+        "价格：64 / " + std::to_string(static_cast<int>(recycle_goods_detail.recycledPrice * 100) / 100.0) + "￥" +
         "       原价：" +
         std::to_string(static_cast<int>(recycle_goods_detail.originalPrice * 100) / 100.0)
         + "￥");
@@ -146,13 +148,17 @@ void UI_MenuItem::create_recycle_goods_form(Player& player)
             std::string path = URL::RECYCLE_GOODS;
 
             string res = HttpService_::post_request(path, jsonStr);
-            bool bSuccess = JsonHelper::get_data(res).get<bool>();
-            //购买成功
-            if (bSuccess)
+            json jsonData = JsonHelper::get_data(res);
+            RecycleGoodsEchoVO recycle_goods_echo_vo(jsonData);
+
+
+            if (recycle_goods_echo_vo.balanceIncr > 0)
             {
                 //执行指令
                 execute_reduce_command(player, recycle_goods_detail_inner.objectId, amount);
-                player.sendMessage("回收成功");
+                player.sendMessage(
+                    "回收成功~\n您的财富增加" + std::to_string(recycle_goods_echo_vo.balanceIncr) + "当前财富：" + std::to_string(
+                        recycle_goods_echo_vo.balance));
             }
         }
         //购买失败
@@ -175,10 +181,11 @@ bool UI_MenuItem::execute_givecommand(Player& player, string object_id, int amou
 
 bool UI_MenuItem::execute_reduce_command(const Player& player, const string& string, int amount)
 {
+    
     return true;
 }
 
-bool UI_MenuItem::query_objects_amount(const Player& player, const string& string, int amount)
-{
+bool UI_MenuItem::query_objects_amount(const Player& player, const string& object_id, int amount)
+{//查询是一组
     return true;
 }

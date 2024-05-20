@@ -9,6 +9,7 @@ string HttpService_::post_request(string& path, string& body)
     httplib::Headers headers = {
         {"Content-Type", "application/json"}
     };
+    Log::Info("path   :" + path + "\n 请求体：" + body);
 
     auto res = cli.Post(path, headers, body, "application/json");
 
@@ -19,7 +20,6 @@ string HttpService_::post_request(string& path, string& body)
     }
     return "";
 }
-
 
 
 string HttpService_::get_request(string& path)

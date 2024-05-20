@@ -14,7 +14,7 @@ MainUserWidget::~MainUserWidget()
 
 void MainUserWidget::CreateUserWidget(Player& player)
 {
-    m_simple_form = new SimpleForm("菜单");
+    m_simple_form = new SimpleForm(NavTitle::MAIN_MENU);
     string res = HttpService_::get_request(path);
     json data = JsonHelper::get_data(res);
 
@@ -25,7 +25,7 @@ void MainUserWidget::CreateUserWidget(Player& player)
             string btnName = itemJson.at("name");
             m_simple_form->appendButton(btnName, [=](Player& player_)
             {
-                UI_MenuItem ui_menu_item(itemJson);//局部变量能否被成员变量引用？
+                UI_MenuItem ui_menu_item(itemJson); //局部变量能否被成员变量引用？
                 ui_menu_item.CreateUserWidget(player_);
             });
         }
