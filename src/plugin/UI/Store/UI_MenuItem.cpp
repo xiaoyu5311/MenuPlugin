@@ -76,15 +76,16 @@ void UI_MenuItem::create_goods_form(Player& player)
         std::to_string(static_cast<int>(sell_goods_detail.originalPrice * 100) / 100.0)
         + "￥");
     m_custom_form.appendSlider("slieder1", "请输入要购买的数量", 1, 64, 1, 0);
-    m_custom_form.appendSlider("slieder2", "请输入要再次购买的数量", 1, 128, 1, 0);
     m_custom_form.sendTo(player, [=](Player& player, ll::form::CustomFormResult const& result,
                                      ll::form::FormCancelReason cancel_reason)
     {
+
+        if (cancel_reason.has_value()) return;
+        
+        
         SellGoodsDetail sell_goods_detail_inner = sell_goods_detail;
         string uuid = player.getUuid().asString();
-        int amount1 = static_cast<int>(get<double>(result->at("slieder1")));
-        int amount2 = static_cast<int>(get<double>(result->at("slieder2")));
-        int amount = amount1 + amount2;
+        int amount = static_cast<int>(get<double>(result->at("slieder1")));
 
         SellGoods sell_goods(uuid, sell_goods_detail_inner.goodsId, amount);
 
@@ -125,7 +126,7 @@ void UI_MenuItem::create_recycle_goods_form(Player& player)
     CustomForm m_custom_form(NavTitle::RECYCLE + recycle_goods_detail.goodsName);
     m_custom_form.appendLabel("回收" + recycle_goods_detail.goodsName + "...");
     m_custom_form.appendLabel(
-        "价格：64 / " + std::to_string(static_cast<int>(recycle_goods_detail.recycledPrice * 100) / 100.0) + "￥" +
+        "价格：1 / " + std::to_string(static_cast<int>(recycle_goods_detail.recycledPrice * 100) / 100.0) + "￥" +
         "       原价：" +
         std::to_string(static_cast<int>(recycle_goods_detail.originalPrice * 100) / 100.0)
         + "￥");
@@ -134,6 +135,7 @@ void UI_MenuItem::create_recycle_goods_form(Player& player)
     m_custom_form.sendTo(player, [=](Player& player, ll::form::CustomFormResult const& result,
                                      ll::form::FormCancelReason cancel_reason)
     {
+        if (cancel_reason.has_value()) return;
         RecycledGoodsDetail recycle_goods_detail_inner = recycle_goods_detail;
         string uuid = player.getUuid().asString();
         int amount = static_cast<int>(get<double>(result->at("slieder1"))); //要出售的数量
@@ -181,11 +183,11 @@ bool UI_MenuItem::execute_givecommand(Player& player, string object_id, int amou
 
 bool UI_MenuItem::execute_reduce_command(const Player& player, const string& string, int amount)
 {
-    
     return true;
 }
 
 bool UI_MenuItem::query_objects_amount(const Player& player, const string& object_id, int amount)
-{//查询是一组
+{
+    //查询是一组
     return true;
 }
